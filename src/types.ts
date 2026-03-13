@@ -17,6 +17,14 @@ export interface Listing {
   year_released?: number;
   watching_count?: number;
   is_verified?: boolean;
+  city?: string;
+}
+
+export interface User {
+  username: string;
+  email: string;
+  city: string;
+  favoriteThemes: string[];
 }
 
 export interface Notification {

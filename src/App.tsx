@@ -40,9 +40,220 @@ import {
   Sparkles,
   ShieldCheck as ShieldCheckIcon
 } from 'lucide-react';
-import { Listing, Category, CATEGORIES, CONDITIONS, Notification } from './types';
+import { Listing, Category, CATEGORIES, CONDITIONS, Notification, User as UserType } from './types';
 
 // --- Components ---
+
+const OnboardingModal = ({ 
+  isOpen, 
+  onClose, 
+  onComplete 
+}: { 
+  isOpen: boolean, 
+  onClose: () => void, 
+  onComplete: (user: UserType) => void 
+}) => {
+  const [step, setStep] = useState(1);
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    username: '',
+    city: '',
+    favoriteThemes: [] as string[]
+  });
+
+  const themes = ['Star Wars', 'Technic', 'City', 'Ninjago', 'Harry Potter', 'Minifigures', 'Architecture', 'Ideas', 'Creator Expert'];
+
+  const toggleTheme = (theme: string) => {
+    setFormData(prev => ({
+      ...prev,
+      favoriteThemes: prev.favoriteThemes.includes(theme)
+        ? prev.favoriteThemes.filter(t => t !== theme)
+        : [...prev.favoriteThemes, theme]
+    }));
+  };
+
+  const handleNext = () => {
+    if (step < 3) setStep(step + 1);
+    else {
+      onComplete({
+        username: formData.username,
+        email: formData.email,
+        city: formData.city,
+        favoriteThemes: formData.favoriteThemes
+      });
+    }
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="absolute inset-0 bg-zinc-900/60 backdrop-blur-sm"
+          />
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            className="relative bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden"
+          >
+            <div className="p-8 border-b border-zinc-100 flex justify-between items-center bg-zinc-50/50">
+              <div>
+                <h2 className="text-2xl font-black text-zinc-900">Join the Community</h2>
+                <p className="text-zinc-500 text-sm font-medium">Step {step} of 3</p>
+              </div>
+              <button onClick={onClose} className="p-2 hover:bg-zinc-100 rounded-full transition-colors">
+                <X className="w-5 h-5 text-zinc-500" />
+              </button>
+            </div>
+
+            <div className="p-8">
+              <div className="flex gap-2 mb-8">
+                {[1, 2, 3].map(i => (
+                  <div 
+                    key={i} 
+                    className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${i <= step ? 'bg-red-600' : 'bg-zinc-100'}`} 
+                  />
+                ))}
+              </div>
+
+              <AnimatePresence mode="wait">
+                {step === 1 && (
+                  <motion.div 
+                    key="step1"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="space-y-4"
+                  >
+                    <div className="space-y-1">
+                      <label className="text-xs font-black text-zinc-400 uppercase tracking-widest">Email Address</label>
+                      <div className="relative">
+                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                        <input 
+                          type="email" 
+                          placeholder="builder@lego.com"
+                          className="w-full pl-11 pr-4 py-3 rounded-2xl border border-zinc-200 focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all font-medium"
+                          value={formData.email}
+                          onChange={e => setFormData({...formData, email: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-black text-zinc-400 uppercase tracking-widest">Password</label>
+                      <div className="relative">
+                        <Shield className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                        <input 
+                          type="password" 
+                          placeholder="••••••••"
+                          className="w-full pl-11 pr-4 py-3 rounded-2xl border border-zinc-200 focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all font-medium"
+                          value={formData.password}
+                          onChange={e => setFormData({...formData, password: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {step === 2 && (
+                  <motion.div 
+                    key="step2"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="space-y-4"
+                  >
+                    <div className="space-y-1">
+                      <label className="text-xs font-black text-zinc-400 uppercase tracking-widest">Display Name</label>
+                      <div className="relative">
+                        <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                        <input 
+                          type="text" 
+                          placeholder="BrickMaster99"
+                          className="w-full pl-11 pr-4 py-3 rounded-2xl border border-zinc-200 focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all font-medium"
+                          value={formData.username}
+                          onChange={e => setFormData({...formData, username: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-black text-zinc-400 uppercase tracking-widest">City / Location</label>
+                      <div className="relative">
+                        <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                        <input 
+                          type="text" 
+                          placeholder="Billund, Denmark"
+                          className="w-full pl-11 pr-4 py-3 rounded-2xl border border-zinc-200 focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all font-medium"
+                          value={formData.city}
+                          onChange={e => setFormData({...formData, city: e.target.value})}
+                        />
+                      </div>
+                      <p className="text-[10px] text-zinc-400 font-bold mt-1 ml-1">📍 Location helps local traders find your builds!</p>
+                    </div>
+                  </motion.div>
+                )}
+
+                {step === 3 && (
+                  <motion.div 
+                    key="step3"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="space-y-4"
+                  >
+                    <label className="text-xs font-black text-zinc-400 uppercase tracking-widest">Favorite Themes</label>
+                    <div className="flex flex-wrap gap-2">
+                      {themes.map(theme => (
+                        <button
+                          key={theme}
+                          type="button"
+                          onClick={() => toggleTheme(theme)}
+                          className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
+                            formData.favoriteThemes.includes(theme)
+                              ? 'bg-red-600 text-white shadow-lg shadow-red-600/20'
+                              : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+                          }`}
+                        >
+                          {theme}
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <div className="mt-12 flex gap-4">
+                {step > 1 && (
+                  <button 
+                    onClick={() => setStep(step - 1)}
+                    className="flex-1 py-4 rounded-2xl text-sm font-black text-zinc-500 hover:bg-zinc-100 transition-colors"
+                  >
+                    Back
+                  </button>
+                )}
+                <button 
+                  onClick={handleNext}
+                  disabled={
+                    (step === 1 && (!formData.email || !formData.password)) ||
+                    (step === 2 && (!formData.username || !formData.city))
+                  }
+                  className="flex-[2] bg-zinc-900 text-white py-4 rounded-2xl text-sm font-black hover:bg-zinc-800 transition-all disabled:opacity-50"
+                >
+                  {step === 3 ? 'Complete Setup' : 'Continue'}
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+};
 
 const NotificationCenter = ({ 
   notifications, 
@@ -136,7 +347,10 @@ const Header = ({
   currentView,
   notifications,
   onNotificationClick,
-  onViewTrade
+  onViewTrade,
+  isLoggedIn,
+  currentUser,
+  onUpdateLocation
 }: { 
   onPostClick: () => void, 
   onSearch: (q: string) => void,
@@ -144,67 +358,141 @@ const Header = ({
   currentView: string,
   notifications: Notification[],
   onNotificationClick: (id: number) => void,
-  onViewTrade: (listingId: number) => void
-}) => (
-  <header className="border-b border-zinc-200 bg-white sticky top-0 z-10">
-    <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-      <div className="flex items-center gap-8">
-        <h1 
-          className="text-2xl font-bold tracking-tighter text-zinc-900 flex items-center gap-2 cursor-pointer"
-          onClick={() => onViewChange('marketplace')}
-        >
-          <div className="w-8 h-8 bg-red-600 rounded flex items-center justify-center text-white font-black text-xs">
-            LEGO
-          </div>
-          Lego Trader
-        </h1>
-        <nav className="hidden md:flex items-center gap-6">
-          <button 
+  onViewTrade: (listingId: number) => void,
+  isLoggedIn: boolean,
+  currentUser: UserType | null,
+  onUpdateLocation: (city: string) => void
+}) => {
+  const [isLocationPopoverOpen, setIsLocationPopoverOpen] = useState(false);
+  const [newCity, setNewCity] = useState(currentUser?.city || '');
+
+  return (
+    <header className="border-b border-zinc-200 bg-white sticky top-0 z-10">
+      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="flex items-center gap-8">
+          <h1 
+            className="text-2xl font-bold tracking-tighter text-zinc-900 flex items-center gap-2 cursor-pointer"
             onClick={() => onViewChange('marketplace')}
-            className={`text-sm font-medium transition-colors ${currentView === 'marketplace' ? 'text-red-600' : 'text-zinc-500 hover:text-zinc-900'}`}
           >
-            Marketplace
-          </button>
-          <button 
-            onClick={() => onViewChange('profile')}
-            className={`text-sm font-medium transition-colors ${currentView === 'profile' ? 'text-red-600' : 'text-zinc-500 hover:text-zinc-900'}`}
-          >
-            Profile
-          </button>
-        </nav>
-        <div className="hidden lg:flex items-center bg-zinc-100 rounded-full px-4 py-1.5 w-80">
-          <Search className="w-4 h-4 text-zinc-400 mr-2" />
-          <input 
-            type="text" 
-            placeholder="Search sets, minifigures..." 
-            className="bg-transparent border-none focus:ring-0 text-sm w-full"
-            onChange={(e) => onSearch(e.target.value)}
+            <div className="w-8 h-8 bg-red-600 rounded flex items-center justify-center text-white font-black text-xs">
+              LEGO
+            </div>
+            Lego Trader
+          </h1>
+          <nav className="hidden md:flex items-center gap-6">
+            <button 
+              onClick={() => onViewChange('marketplace')}
+              className={`text-sm font-medium transition-colors ${currentView === 'marketplace' ? 'text-red-600' : 'text-zinc-500 hover:text-zinc-900'}`}
+            >
+              Marketplace
+            </button>
+            <button 
+              onClick={() => onViewChange('profile')}
+              className={`text-sm font-medium transition-colors ${currentView === 'profile' ? 'text-red-600' : 'text-zinc-500 hover:text-zinc-900'}`}
+            >
+              Profile
+            </button>
+          </nav>
+          <div className="hidden lg:flex items-center bg-zinc-100 rounded-full px-4 py-1.5 w-80">
+            <Search className="w-4 h-4 text-zinc-400 mr-2" />
+            <input 
+              type="text" 
+              placeholder="Search sets, minifigures..." 
+              className="bg-transparent border-none focus:ring-0 text-sm w-full"
+              onChange={(e) => onSearch(e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="flex items-center gap-4">
+          <NotificationCenter 
+            notifications={notifications} 
+            onNotificationClick={onNotificationClick}
+            onViewTrade={onViewTrade}
           />
+          <button 
+            onClick={onPostClick}
+            className="bg-zinc-900 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-zinc-800 transition-colors flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Post Listing
+          </button>
+          {isLoggedIn && currentUser ? (
+            <div className="relative">
+              <button 
+                onClick={() => onViewChange('profile')}
+                className={`flex items-center gap-3 pl-1 pr-4 py-1 rounded-full transition-colors ${currentView === 'profile' ? 'bg-red-50 text-red-600' : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'}`}
+              >
+                <div className="w-8 h-8 bg-zinc-900 rounded-full flex items-center justify-center text-white text-xs font-black">
+                  {currentUser.username.charAt(0).toUpperCase()}
+                </div>
+                <div className="text-left">
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px] font-black uppercase tracking-widest leading-none">Hi, {currentUser.username}</span>
+                    <span className="text-zinc-300">|</span>
+                    <span 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsLocationPopoverOpen(!isLocationPopoverOpen);
+                      }}
+                      className="text-[10px] font-bold text-red-600 hover:underline flex items-center gap-0.5"
+                    >
+                      📍 {currentUser.city}
+                    </span>
+                  </div>
+                  <div className="text-[9px] font-bold opacity-60 leading-none mt-1">Lego Collector</div>
+                </div>
+              </button>
+
+              <AnimatePresence>
+                {isLocationPopoverOpen && (
+                  <>
+                    <div className="fixed inset-0 z-20" onClick={() => setIsLocationPopoverOpen(false)} />
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-zinc-100 z-30 p-4"
+                    >
+                      <h4 className="text-xs font-black uppercase tracking-widest text-zinc-400 mb-3">Update Location</h4>
+                      <div className="space-y-3">
+                        <div className="relative">
+                          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400" />
+                          <input 
+                            type="text" 
+                            placeholder="City, Country"
+                            className="w-full pl-9 pr-3 py-2 rounded-xl border border-zinc-200 text-xs font-medium focus:ring-2 focus:ring-red-500 outline-none"
+                            value={newCity}
+                            onChange={(e) => setNewCity(e.target.value)}
+                          />
+                        </div>
+                        <button 
+                          onClick={() => {
+                            onUpdateLocation(newCity);
+                            setIsLocationPopoverOpen(false);
+                          }}
+                          className="w-full bg-zinc-900 text-white py-2 rounded-xl text-xs font-black hover:bg-zinc-800 transition-colors"
+                        >
+                          Save Location
+                        </button>
+                      </div>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : (
+            <button 
+              onClick={onPostClick}
+              className="p-2 rounded-full bg-zinc-100 text-zinc-600 hover:bg-zinc-200 transition-colors"
+            >
+              <User className="w-5 h-5" />
+            </button>
+          )}
         </div>
       </div>
-      <div className="flex items-center gap-4">
-        <NotificationCenter 
-          notifications={notifications} 
-          onNotificationClick={onNotificationClick}
-          onViewTrade={onViewTrade}
-        />
-        <button 
-          onClick={onPostClick}
-          className="bg-zinc-900 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-zinc-800 transition-colors flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          Post Listing
-        </button>
-        <button 
-          onClick={() => onViewChange('profile')}
-          className={`p-2 rounded-full transition-colors ${currentView === 'profile' ? 'bg-red-50 text-red-600' : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'}`}
-        >
-          <User className="w-5 h-5" />
-        </button>
-      </div>
-    </div>
-  </header>
-);
+    </header>
+  );
+};
 
 const FeaturedHero = ({ onTradeClick }: { onTradeClick: () => void }) => (
   <div className="relative w-full h-[400px] rounded-[2.5rem] overflow-hidden mb-12 group">
@@ -253,72 +541,93 @@ const FeaturedHero = ({ onTradeClick }: { onTradeClick: () => void }) => (
   </div>
 );
 
-const ListingCard = ({ listing, onClick }: { listing: Listing, onClick: () => void, key?: React.Key }) => (
-  <motion.div 
-    layout
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    whileHover={{ y: -4 }}
-    onClick={onClick}
-    className="group cursor-pointer bg-white border border-zinc-200 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300"
-  >
-    <div className="aspect-square bg-zinc-100 relative overflow-hidden">
-      {listing.image_url ? (
-        <img 
-          src={listing.image_url} 
-          alt={listing.title} 
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          referrerPolicy="no-referrer"
-        />
-      ) : (
-        <div className="w-full h-full flex items-center justify-center text-zinc-300">
-          <Package className="w-12 h-12" />
-        </div>
-      )}
-      <div className="absolute top-3 left-3 bg-white/90 backdrop-blur px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider text-zinc-600 border border-zinc-200">
-        {listing.condition}
-      </div>
-    </div>
-    <div className="p-4">
-      <div className="flex justify-between items-start mb-1">
-        <h3 className="font-semibold text-zinc-900 line-clamp-1 group-hover:text-red-600 transition-colors">
-          {listing.title}
-        </h3>
-        <span className="text-sm font-bold text-zinc-900">${listing.price}</span>
-      </div>
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2 text-xs text-zinc-500">
-          <Tag className="w-3 h-3" />
-          {listing.category}
-        </div>
-        {listing.set_number && (
-          <span className="text-[10px] font-bold text-zinc-400">#{listing.set_number}</span>
-        )}
-      </div>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 text-[10px] text-zinc-400 uppercase font-medium">
-            <Clock className="w-3 h-3" />
-            {new Date(listing.created_at).toLocaleDateString()}
+const ListingCard = ({ listing, onClick, currentUser }: { listing: Listing, onClick: () => void, currentUser: UserType | null, key?: React.Key }) => {
+  const isLocal = currentUser && listing.city === currentUser.city;
+
+  return (
+    <motion.div 
+      layout
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -4 }}
+      onClick={onClick}
+      className="group cursor-pointer bg-white border border-zinc-200 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300"
+    >
+      <div className="aspect-square bg-zinc-100 relative overflow-hidden">
+        {listing.image_url ? (
+          <img 
+            src={listing.image_url} 
+            alt={listing.title} 
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            referrerPolicy="no-referrer"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-zinc-300">
+            <Package className="w-12 h-12" />
           </div>
-          {listing.trade_availability && (
-            <span className={`text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md ${
-              listing.trade_availability === 'Available for Trade' ? 'bg-emerald-50 text-emerald-600' :
-              listing.trade_availability === 'Trade + Cash' ? 'bg-blue-50 text-blue-600' :
-              'bg-zinc-50 text-zinc-600'
+        )}
+        <div className="absolute top-3 left-3 flex flex-col gap-1.5">
+          <div className="bg-white/90 backdrop-blur px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider text-zinc-600 border border-zinc-200 w-fit">
+            {listing.condition}
+          </div>
+          {listing.city && (
+            <div className={`backdrop-blur px-2 py-1 rounded text-[10px] font-bold border flex items-center gap-1 w-fit ${
+              isLocal 
+                ? 'bg-red-600/90 text-white border-red-500 shadow-lg shadow-red-600/20' 
+                : 'bg-zinc-900/60 text-white border-zinc-800'
             }`}>
-              {listing.trade_availability === 'Available for Trade' ? 'Trade' : 
-               listing.trade_availability === 'Trade + Cash' ? 'Trade+' : 'Sale'}
-            </span>
+              📍 {listing.city}
+            </div>
           )}
         </div>
-        <ChevronRight className="w-4 h-4 text-zinc-300 group-hover:text-zinc-900 transition-colors" />
+        {isLocal && (
+          <div className="absolute bottom-3 left-3 right-3 bg-emerald-500/90 backdrop-blur text-white text-[9px] font-black uppercase tracking-widest py-1.5 px-3 rounded-xl flex items-center justify-center gap-1.5 shadow-lg">
+            <ShieldCheckIcon className="w-3 h-3" />
+            Local Pickup Available
+          </div>
+        )}
       </div>
-    </div>
-  </motion.div>
-);
+      <div className="p-4">
+        <div className="flex justify-between items-start mb-1">
+          <h3 className="font-semibold text-zinc-900 line-clamp-1 group-hover:text-red-600 transition-colors">
+            {listing.title}
+          </h3>
+          <span className="text-sm font-bold text-zinc-900">${listing.price}</span>
+        </div>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2 text-xs text-zinc-500">
+            <Tag className="w-3 h-3" />
+            {listing.category}
+          </div>
+          {listing.set_number && (
+            <span className="text-[10px] font-bold text-zinc-400">#{listing.set_number}</span>
+          )}
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 text-[10px] text-zinc-400 uppercase font-medium">
+              <Clock className="w-3 h-3" />
+              {new Date(listing.created_at).toLocaleDateString()}
+            </div>
+            {listing.trade_availability && (
+              <span className={`text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md ${
+                listing.trade_availability === 'Available for Trade' ? 'bg-emerald-50 text-emerald-600' :
+                listing.trade_availability === 'Trade + Cash' ? 'bg-blue-50 text-blue-600' :
+                'bg-zinc-50 text-zinc-600'
+              }`}>
+                {listing.trade_availability === 'Available for Trade' ? 'Trade' : 
+                 listing.trade_availability === 'Trade + Cash' ? 'Trade+' : 'Sale'}
+              </span>
+            )}
+          </div>
+          <ChevronRight className="w-4 h-4 text-zinc-300 group-hover:text-zinc-900 transition-colors" />
+        </div>
+      </div>
+    </motion.div>
+  );
+};
 
-const PostModal = ({ isOpen, onClose, onPost }: { isOpen: boolean, onClose: () => void, onPost: () => void }) => {
+const PostModal = ({ isOpen, onClose, onPost, currentUser }: { isOpen: boolean, onClose: () => void, onPost: () => void, currentUser: UserType | null }) => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -334,8 +643,15 @@ const PostModal = ({ isOpen, onClose, onPost }: { isOpen: boolean, onClose: () =
     is_complete: true,
     piece_count: '',
     year_released: '',
-    is_verified: false
+    is_verified: false,
+    city: currentUser?.city || ''
   });
+
+  useEffect(() => {
+    if (currentUser?.city && !formData.city) {
+      setFormData(prev => ({ ...prev, city: currentUser.city }));
+    }
+  }, [currentUser]);
 
   const [isScanning, setIsScanning] = useState(false);
   const [scanComplete, setScanComplete] = useState(false);
@@ -542,13 +858,13 @@ const PostModal = ({ isOpen, onClose, onPost }: { isOpen: boolean, onClose: () =
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-zinc-500 uppercase">Year Released</label>
+                  <label className="text-xs font-bold text-zinc-500 uppercase">City / Location</label>
                   <input 
-                    type="number" 
-                    placeholder="e.g. 2017"
+                    type="text" 
+                    placeholder="e.g. Billund, DK"
                     className="w-full px-4 py-2 rounded-xl border border-zinc-200 focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all"
-                    value={formData.year_released}
-                    onChange={e => setFormData({...formData, year_released: e.target.value})}
+                    value={formData.city}
+                    onChange={e => setFormData({...formData, city: e.target.value})}
                   />
                 </div>
               </div>
@@ -1637,7 +1953,33 @@ export default function App() {
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [initialShowTrade, setInitialShowTrade] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [currentUser, setCurrentUser] = useState<UserType | null>(null);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+  const [showLocalOnly, setShowLocalOnly] = useState(false);
   const [currentView, setCurrentView] = useState<'marketplace' | 'profile'>('marketplace');
+
+  const handlePostClick = () => {
+    if (isLoggedIn) {
+      setIsPostModalOpen(true);
+    } else {
+      setIsOnboardingOpen(true);
+    }
+  };
+
+  const handleUpdateLocation = (city: string) => {
+    if (currentUser) {
+      setCurrentUser({ ...currentUser, city });
+    }
+  };
+
+  const handleOnboardingComplete = (user: UserType) => {
+    setCurrentUser(user);
+    setIsLoggedIn(true);
+    setIsOnboardingOpen(false);
+    // Automatically proceed to post listing
+    setIsPostModalOpen(true);
+  };
   const [notifications, setNotifications] = useState<Notification[]>([
     {
       id: 1,
@@ -1717,13 +2059,16 @@ export default function App() {
   return (
     <div className="min-h-screen bg-zinc-50 font-sans text-zinc-900">
       <Header 
-        onPostClick={() => setIsPostModalOpen(true)} 
+        onPostClick={handlePostClick} 
         onSearch={setSearchQuery}
         onViewChange={setCurrentView}
         currentView={currentView}
         notifications={notifications}
         onNotificationClick={handleNotificationClick}
         onViewTrade={handleViewTrade}
+        isLoggedIn={isLoggedIn}
+        currentUser={currentUser}
+        onUpdateLocation={handleUpdateLocation}
       />
 
       <AnimatePresence mode="wait">
@@ -1738,6 +2083,34 @@ export default function App() {
             <div className="flex flex-col md:flex-row gap-8">
               {/* Sidebar Filters */}
               <aside className="w-full md:w-64 space-y-8">
+                <div className="space-y-4">
+                  <h2 className="text-sm font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                    <Zap className="w-4 h-4" />
+                    Discovery Settings
+                  </h2>
+                  <div className="flex items-center justify-between p-4 bg-white border border-zinc-200 rounded-2xl shadow-sm">
+                    <div className="space-y-0.5">
+                      <div className="text-xs font-bold text-zinc-900">Show Local Only</div>
+                      <div className="text-[10px] text-zinc-500 font-medium">📍 {currentUser?.city || 'Set location'}</div>
+                    </div>
+                    <button 
+                      onClick={() => {
+                        if (!isLoggedIn) {
+                          setIsOnboardingOpen(true);
+                        } else {
+                          setShowLocalOnly(!showLocalOnly);
+                        }
+                      }}
+                      className={`w-10 h-5 rounded-full transition-colors relative ${showLocalOnly ? 'bg-red-600' : 'bg-zinc-200'}`}
+                    >
+                      <motion.div 
+                        animate={{ x: showLocalOnly ? 22 : 2 }}
+                        className="absolute top-1 w-3 h-3 bg-white rounded-full shadow-sm"
+                      />
+                    </button>
+                  </div>
+                </div>
+
                 <div>
                   <h2 className="text-sm font-bold text-zinc-500 uppercase tracking-widest mb-4 flex items-center gap-2">
                     <Filter className="w-4 h-4" />
@@ -1827,7 +2200,8 @@ export default function App() {
                     piece_count: 9090,
                     year_released: 2021,
                     watching_count: 150,
-                    is_verified: true
+                    is_verified: true,
+                    city: 'London, UK'
                   };
                   setSelectedListing(titanicListing as Listing);
                   setInitialShowTrade(true);
@@ -1839,22 +2213,40 @@ export default function App() {
                       <div key={i} className="bg-zinc-200 animate-pulse rounded-2xl aspect-[3/4]" />
                     ))}
                   </div>
-                ) : listings.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {listings.map(listing => (
-                      <ListingCard 
-                        key={listing.id} 
-                        listing={listing} 
-                        onClick={() => setSelectedListing(listing)}
-                      />
-                    ))}
-                  </div>
                 ) : (
-                  <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-zinc-300">
-                    <Package className="w-12 h-12 text-zinc-300 mx-auto mb-4" />
-                    <h3 className="text-lg font-bold text-zinc-900">No listings found</h3>
-                    <p className="text-zinc-500">Try adjusting your search or category filters.</p>
-                  </div>
+                  <>
+                    {showLocalOnly && currentUser && listings.filter(l => l.city === currentUser.city).length === 0 ? (
+                      <div className="flex flex-col items-center justify-center py-20 text-center bg-white border border-zinc-200 rounded-[2.5rem] shadow-sm">
+                        <div className="w-24 h-24 bg-zinc-100 rounded-full flex items-center justify-center mb-6">
+                          <Box className="w-10 h-10 text-zinc-300" />
+                        </div>
+                        <h3 className="text-xl font-black text-zinc-900 mb-2">Empty Bin!</h3>
+                        <p className="text-zinc-500 text-sm max-w-xs mb-8 font-medium">
+                          No builds found in <span className="text-red-600 font-bold">{currentUser?.city}</span> yet. Be the first to post a listing!
+                        </p>
+                        <button 
+                          onClick={handlePostClick}
+                          className="bg-zinc-900 text-white px-8 py-3 rounded-2xl text-sm font-black hover:bg-zinc-800 transition-all flex items-center gap-2"
+                        >
+                          <Plus className="w-4 h-4" />
+                          Post Listing
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {listings
+                          .filter(l => !showLocalOnly || (currentUser && l.city === currentUser.city))
+                          .map(listing => (
+                            <ListingCard 
+                              key={listing.id} 
+                              listing={listing} 
+                              onClick={() => setSelectedListing(listing)} 
+                              currentUser={currentUser}
+                            />
+                          ))}
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>
@@ -1871,6 +2263,13 @@ export default function App() {
         isOpen={isPostModalOpen} 
         onClose={() => setIsPostModalOpen(false)} 
         onPost={fetchListings}
+        currentUser={currentUser}
+      />
+
+      <OnboardingModal 
+        isOpen={isOnboardingOpen} 
+        onClose={() => setIsOnboardingOpen(false)} 
+        onComplete={handleOnboardingComplete}
       />
 
       <AnimatePresence>
